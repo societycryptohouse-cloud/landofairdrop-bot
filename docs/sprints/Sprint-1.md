@@ -85,3 +85,6 @@ staging/prod karışmasını engellemek ve minimum operasyonel görünürlük sa
 - Staging token/prod token karışması engellenmiş  
 - Rate-limit + analytics minimum seviye hazır  
 - `/health` ve admin özet komutu çalışır  
+
+## UX Referansı
+- Draft metinler: `docs/UX_COPY.md`
