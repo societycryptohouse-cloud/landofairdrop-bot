@@ -8,6 +8,14 @@ def _env(key: str, default: str = "") -> str:
     return os.getenv(key, default).strip()
 
 
+def _first_env(*keys: str) -> str:
+    for k in keys:
+        v = os.getenv(k)
+        if v:
+            return v.strip()
+    raise RuntimeError(f"Missing env var: one of {keys}")
+
+
 def _env_list(key: str) -> list[int]:
     raw = _env(key)
     if not raw:
@@ -27,7 +35,7 @@ def _env_int(key: str) -> int | None:
 
 @dataclass(frozen=True)
 class Settings:
-    bot_token: str = _env("BOT_TOKEN")
+    bot_token: str = _first_env("TELEGRAM_BOT_TOKEN", "BOT_TOKEN")
     database_url: str = _env("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
     redis_url: str = _env("REDIS_URL")
     admin_user_ids: list[int] = field(default_factory=lambda: _env_list("ADMIN_USER_IDS"))
