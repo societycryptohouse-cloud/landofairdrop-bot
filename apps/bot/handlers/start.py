@@ -13,47 +13,13 @@ from packages.db.session import async_session_maker
 router = Router()
 
 
-@router.message(Command("start"))
-async def cmd_start(message: Message) -> None:
-    args = (message.text or "").split(maxsplit=1)
-    ref_arg = args[1] if len(args) > 1 else None
-
-    async with async_session_maker() as session:
-        user = await upsert_user(
-            session,
-            message.from_user.id,
-            message.from_user.username if message.from_user else None,
-        )
-
-        if ref_arg and ref_arg.startswith("ref_") and user.referred_by_user_id is None:
-            ref_code = ref_arg.replace("ref_", "", 1)
-            ref_user = await get_user_by_ref_code(session, ref_code)
-            if ref_user and ref_user.id != user.id:
-                user.referred_by_user_id = ref_user.id
-                await session.commit()
-
-        wallet = await get_wallet_address(session, message.from_user.id)
-
-    kb = InlineKeyboardBuilder()
-    if wallet:
-        kb.button(text="✅ Cüzdan Bağlı", callback_data="noop:wallet")
-    else:
-        kb.button(text="Cüzdan Bağla", callback_data="go:wallet")
-    kb.button(text="Görevler", callback_data="go:tasks")
-    kb.button(text="Profil", callback_data="go:me")
-
-    wallet_line = f"\n\nCüzdan: {mask_wallet(wallet)}" if wallet else ""
-    text = (
-        f"<b>{settings.bot_name}</b>\n"
-        "Airdrop görevlerini tamamla, puan kazan, durumunu takip et.\n"
-        f"{wallet_line}\n\n"
-        "Başlamak için aşağıdan seç:"
-    )
-    await message.answer(text, reply_markup=kb.as_markup())
+@router.message(Command("start_legacy"))
+async def cmd_start_legacy(message: Message) -> None:
+    await message.answer("Legacy akış. Yeni başlangıç için /start kullanın.")
 
 
-@router.message(Command("help"))
-async def cmd_help(message: Message) -> None:
+@router.message(Command("help_legacy"))
+async def cmd_help_legacy(message: Message) -> None:
     text = (
         "Yardım\n\n"
         "Bu bot airdrop görevlerini tamamlamanı, durumunu takip etmeni "

@@ -34,6 +34,10 @@ class Settings:
     webhook_url: str = _env("WEBHOOK_URL")
     env: str = _env("ENV", "local")
     app_env: str = _env("APP_ENV", _env("ENV", "local"))
+    bot_mode: str = _env("BOT_MODE", "polling")
+
+    api_base_url: str = _env("API_BASE_URL")
+    api_key: str = _env("API_KEY")
 
     bot_name: str = _env("BOT_NAME", "Land of Airdrop")
     bot_username: str = _env("BOT_USERNAME", "@Landofairdropbot")

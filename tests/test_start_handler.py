@@ -17,68 +17,63 @@ def extract_buttons(reply_markup):
 
 
 @pytest.mark.anyio
-async def test_start_shows_connect_wallet_when_missing(mocker):
+async def test_start_api_returns_buttons(mocker):
     """
-    /start -> wallet yoksa ' Cüzdan Bağla' butonu gelmeli
+    /start -> API'den gelen butonlar gönderilmeli
     """
-    from apps.bot.handlers.start import cmd_start
+    from apps.bot.handlers.tg_api import cmd_start_api
 
-    session = mocker.Mock()
-    session.__aenter__ = AsyncMock(return_value=session)
-    session.__aexit__ = AsyncMock(return_value=None)
-
-    mocker.patch("apps.bot.handlers.start.async_session_maker", return_value=session)
-    mocker.patch("apps.bot.handlers.start.upsert_user", new=AsyncMock())
-    mocker.patch("apps.bot.handlers.start.get_wallet_address", new=AsyncMock(return_value=None))
+    mocker.patch(
+        "apps.bot.handlers.tg_api.api_post",
+        new=AsyncMock(
+            return_value={
+                "message": "Rolünü seç",
+                "buttons": [
+                    {"text": "Maceracı (Çocuk)", "callback": "role:child"},
+                    {"text": "Gözlemci (Ebeveyn)", "callback": "role:parent"},
+                ],
+            }
+        ),
+    )
 
     message = mocker.Mock()
     message.from_user = mocker.Mock(id=111, username="u1")
     message.text = "/start"
     message.answer = AsyncMock()
 
-    await cmd_start(message)
+    await cmd_start_api(message)
 
     message.answer.assert_awaited()
     kwargs = message.answer.await_args.kwargs
     buttons = extract_buttons(kwargs.get("reply_markup"))
 
-    assert ("Cüzdan Bağla", "go:wallet") in buttons
-    assert ("Görevler", "go:tasks") in buttons
-    assert ("Profil", "go:me") in buttons
+    assert ("Maceracı (Çocuk)", "role:child") in buttons
+    assert ("Gözlemci (Ebeveyn)", "role:parent") in buttons
 
 
 @pytest.mark.anyio
-async def test_start_shows_wallet_connected_when_present(mocker):
+async def test_role_callback_calls_api(mocker):
     """
-    /start -> wallet varsa '✅ Cüzdan Bağlı' (noop:wallet) butonu gelmeli
+    role:child -> API çağrısı yapıp mesaj döndürmeli
     """
-    from apps.bot.handlers.start import cmd_start
+    from apps.bot.handlers.tg_api import cb_role_select
 
-    session = mocker.Mock()
-    session.__aenter__ = AsyncMock(return_value=session)
-    session.__aexit__ = AsyncMock(return_value=None)
-    mocker.patch("apps.bot.handlers.start.async_session_maker", return_value=session)
-
-    mocker.patch("apps.bot.handlers.start.upsert_user", new=AsyncMock())
     mocker.patch(
-        "apps.bot.handlers.start.get_wallet_address",
-        new=AsyncMock(return_value="0x1234567890abcdef1234567890abcdef12345678"),
+        "apps.bot.handlers.tg_api.api_post",
+        new=AsyncMock(return_value={"message": "Rol kaydedildi", "buttons": []}),
     )
 
-    message = mocker.Mock()
-    message.from_user = mocker.Mock(id=222, username="u2")
-    message.text = "/start"
-    message.answer = AsyncMock()
+    cb = mocker.Mock()
+    cb.data = "role:child"
+    cb.from_user = mocker.Mock(id=222)
+    cb.message = mocker.Mock()
+    cb.message.answer = AsyncMock()
+    cb.answer = AsyncMock()
 
-    await cmd_start(message)
+    await cb_role_select(cb)
 
-    message.answer.assert_awaited()
-    kwargs = message.answer.await_args.kwargs
-    buttons = extract_buttons(kwargs.get("reply_markup"))
-
-    assert ("✅ Cüzdan Bağlı", "noop:wallet") in buttons
-    assert ("Görevler", "go:tasks") in buttons
-    assert ("Profil", "go:me") in buttons
+    cb.message.answer.assert_awaited()
+    cb.answer.assert_awaited()
 
 
 @pytest.mark.anyio
