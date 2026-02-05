@@ -7,3 +7,11 @@ __pycache__/
 # Virtual env
 .venv/
 venv/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+!.env.staging.sample
+!.env.prod.sample
