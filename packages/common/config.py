@@ -33,6 +33,7 @@ class Settings:
     admin_user_ids: list[int] = field(default_factory=lambda: _env_list("ADMIN_USER_IDS"))
     webhook_url: str = _env("WEBHOOK_URL")
     env: str = _env("ENV", "local")
+    app_env: str = _env("APP_ENV", _env("ENV", "local"))
 
     bot_name: str = _env("BOT_NAME", "Land of Airdrop")
     bot_username: str = _env("BOT_USERNAME", "@Landofairdropbot")
@@ -49,6 +50,9 @@ class Settings:
     broadcast_per_second: int = _env_int("BROADCAST_PER_SECOND") or 10
 
     referral_bonus_points: int = _env_int("REFERRAL_BONUS_POINTS") or 10
+
+    prod_bot_token_fingerprint: str = _env("PROD_BOT_TOKEN_FINGERPRINT")
+    staging_bot_token_fingerprint: str = _env("STAGING_BOT_TOKEN_FINGERPRINT")
 
 
 settings = Settings()

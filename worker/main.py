@@ -7,6 +7,7 @@ import redis.asyncio as redis
 from aiogram import Bot
 
 from packages.common.config import settings
+from packages.common.security import is_token_match
 from packages.common.queue import QUEUE_KEY
 
 
@@ -26,6 +27,15 @@ async def run_broadcast(bot: Bot, payload: dict, per_second: int) -> dict:
 
 
 async def worker_loop() -> None:
+    if settings.app_env == "staging" and is_token_match(
+        settings.bot_token, settings.prod_bot_token_fingerprint
+    ):
+        raise SystemExit("Refusing to start: staging is using PROD token.")
+    if settings.app_env == "prod" and is_token_match(
+        settings.bot_token, settings.staging_bot_token_fingerprint
+    ):
+        raise SystemExit("Refusing to start: prod is using STAGING token.")
+
     client = redis.from_url(settings.redis_url)
     bot = Bot(token=settings.bot_token)
     per_second = settings.broadcast_per_second

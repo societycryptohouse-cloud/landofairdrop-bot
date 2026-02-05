@@ -4,6 +4,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 
 from packages.common.config import settings
+from packages.common.security import is_token_match
 from apps.bot.handlers.start import router as start_router
 from apps.bot.handlers.tasks import router as tasks_router
 from apps.bot.handlers.admin import router as admin_router
@@ -42,6 +43,15 @@ def build_dispatcher() -> Dispatcher:
 
 
 async def main() -> None:
+    if settings.app_env == "staging" and is_token_match(
+        settings.bot_token, settings.prod_bot_token_fingerprint
+    ):
+        raise SystemExit("Refusing to start: staging is using PROD token.")
+    if settings.app_env == "prod" and is_token_match(
+        settings.bot_token, settings.staging_bot_token_fingerprint
+    ):
+        raise SystemExit("Refusing to start: prod is using STAGING token.")
+
     bot = Bot(token=settings.bot_token, parse_mode=ParseMode.HTML)
     await set_commands(bot)
 
