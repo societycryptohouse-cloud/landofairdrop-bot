@@ -1,12 +1,12 @@
-# UX Copy — Telegram Bot (Draft)
+# UX Copy — Telegram Bot (Minimal/Profesyonel · Siz · Orta Emoji)
 
 Bu doküman bot içi metinler için **başlangıç kopyasıdır**. İstersen dil tonu ve terimleri birlikte ince ayarlarız.
 
 ## /start — Rol Seçimi
 **Mesaj**
 ```
-Hoş geldin! 👋
-Land of Airdrop deneyimine başlamak için rolünü seç:
+Hoş geldiniz. 👋
+Land of Airdrop deneyimine başlamak için rolünüzü seçin:
 ```
 
 **Butonlar**
@@ -20,7 +20,7 @@ Land of Airdrop deneyimine başlamak için rolünü seç:
 **Mesaj**
 ```
 Ada Pasaportu oluşturuyoruz.
-Bu pasaport sadece oyun içi ilerlemeni ve güvenliği takip etmek için kullanılır.
+Bu pasaport yalnızca oyun içi ilerleme ve güvenlik takibi için kullanılır.
 Kişisel bilgi istemiyoruz.
 ```
 **Buton**
@@ -28,8 +28,8 @@ Kişisel bilgi istemiyoruz.
 
 **Başarılı**
 ```
-Pasaportun hazır ✅
-Şimdi günlük görev menüsüne geçebilirsin.
+Pasaportunuz hazır ✅
+Şimdi günlük görev menüsüne geçebilirsiniz.
 ```
 
 ---
@@ -37,7 +37,7 @@ Pasaportun hazır ✅
 ## Ebeveyn Akışı — Çocuk Bağlama
 **/link komutu**
 ```
-Çocuğun için tek kullanımlık bir bağlama kodu oluşturalım.
+Çocuğunuz için tek kullanımlık bir bağlama kodu oluşturalım.
 Bu kod 10 dakika geçerli olacak.
 ```
 **Buton**
@@ -45,19 +45,19 @@ Bu kod 10 dakika geçerli olacak.
 
 **Kod üretildi**
 ```
-Kodun hazır: {CODE}
-Bu kodu çocuğunla paylaş.
+Kodunuz hazır: {CODE}
+Bu kodu çocuğunuzla paylaşın.
 ```
 
 **Çocuk tarafı**
 ```
-Ebeveyn kodunu gir:
+Ebeveyn kodunu girin:
 ```
 
 **Başarılı**
 ```
 Bağlantı tamamlandı ✅
-Ebeveynin artık ilerlemeni takip edebilir.
+Ebeveyniniz artık ilerlemenizi takip edebilir.
 ```
 
 ---
@@ -78,13 +78,13 @@ Bugünün görevleri:
 ## /intent — Günlük Niyet
 **Mesaj**
 ```
-Bugünün niyetini sesli mesaj olarak gönder.
-Kısa ve net olması yeterli.
+Bugünün niyetini sesli mesaj olarak gönderin.
+Kısa ve net olması yeterlidir.
 ```
 
 **Başarılı**
 ```
-Sesin alındı ✅
+Sesiniz alındı ✅
 Bugünün söz mührü güçlendi.
 ```
 
@@ -104,7 +104,7 @@ Bugünün mini içeriği:
 ## /status — İlerleme ve Çarpan
 **Mesaj**
 ```
-Durumun:
+Durumunuz:
 • Streak: {STREAK}
 • Mühür Seviyesi: {SEAL_LEVEL}
 • Bugünün Çarpanı: x{MULTIPLIER}
@@ -115,7 +115,7 @@ Durumun:
 ## /help — Güvenlik
 **Mesaj**
 ```
-Bu bot asla senden seed phrase / private key / şifre istemez.
+Bu bot asla sizden seed phrase / private key / şifre istemez.
 Resmi duyurular yalnızca burada paylaşılır.
 ```
 
@@ -124,10 +124,10 @@ Resmi duyurular yalnızca burada paylaşılır.
 ## Sistem Mesajları
 **Rate limit**
 ```
-Biraz hızlısın. Lütfen {SECONDS} saniye bekle.
+Biraz hızlısınız. Lütfen {SECONDS} saniye bekleyin.
 ```
 
 **Bakım modu**
 ```
-Şu an kısa bir bakım var. Lütfen biraz sonra tekrar dene.
+Şu an kısa bir bakım var. Lütfen biraz sonra tekrar deneyin.
 ```
