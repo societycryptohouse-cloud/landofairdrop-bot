@@ -27,7 +27,8 @@ cp .env.example .env.prod
 
 Fill in:
 - `APP_ENV` (staging or prod)
-- `BOT_TOKEN`
+- `TELEGRAM_BOT_TOKEN`
+- `API_BASE_URL` / `API_KEY`
 - `DATABASE_URL` (or `POSTGRES_*` if you compose DSN yourself)
 - `REDIS_URL`
 
