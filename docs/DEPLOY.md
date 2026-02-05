@@ -1,120 +1,100 @@
-# Deploy Rehberi — Docker Compose
+# Deployment Guide (Staging & Prod)
 
-Bu doküman, Land of Airdrop botunu Docker Compose ile prod’a almak için **net ve uygulanabilir** bir yol sunar.
+This repo supports Docker-based deployment using a base compose file plus
+environment-specific overrides.
 
-## 1) Klasör Yapısı (Önerilen)
-```
-/opt/landofairdrop-bot
-  ├─ .env
-  ├─ docker-compose.prod.yml
-  ├─ landofairdrop-bot/   (repo)
-```
+## Prerequisites
+- Docker + Docker Compose v2
+- A Telegram Bot Token (staging and prod should use different tokens)
+- Recommended: a VPS running Ubuntu 22.04+
 
-## 2) .env (Sunucuda)
-Örnek:
-```
-BOT_TOKEN=xxxx
-DATABASE_URL=postgresql+asyncpg://land:land@postgres:5432/landofairdrop
-REDIS_URL=redis://redis:6379/0
-ADMIN_USER_IDS=12345,67890
-ENV=prod
+---
 
-TG_JOIN_CHANNEL=@YourChannel
-TG_JOIN_CHANNEL_ID=-1001234567890
+## Environment Files
 
-REFERRAL_BONUS_POINTS=10
-BROADCAST_PER_SECOND=10
+We keep `.env.example` in the repo and **do not** commit `.env.staging` or
+`.env.prod`.
 
-BOT_NAME=Land of Airdrop
-BOT_USERNAME=@Landofairdropbot
+Create staging env:
+```bash
+cp .env.example .env.staging
 ```
 
-## 3) docker-compose.prod.yml
-```
-version: "3.9"
-services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_USER: land
-      POSTGRES_PASSWORD: land
-      POSTGRES_DB: landofairdrop
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  redis:
-    image: redis:7
-    restart: unless-stopped
-
-  bot:
-    image: python:3.12-slim
-    working_dir: /app
-    volumes:
-      - ./landofairdrop-bot:/app
-    env_file:
-      - .env
-    command: >
-      sh -c "pip install -r requirements.txt &&
-             alembic upgrade head &&
-             python apps/bot/main.py"
-    depends_on:
-      - postgres
-      - redis
-    restart: unless-stopped
-
-  worker:
-    image: python:3.12-slim
-    working_dir: /app
-    volumes:
-      - ./landofairdrop-bot:/app
-    env_file:
-      - .env
-    command: >
-      sh -c "pip install -r requirements.txt &&
-             python worker/main.py"
-    depends_on:
-      - redis
-    restart: unless-stopped
-
-volumes:
-  pg_data:
+Create prod env:
+```bash
+cp .env.example .env.prod
 ```
 
-## 4) Deploy Komutları
+Fill in:
+- `APP_ENV` (staging or prod)
+- `BOT_TOKEN`
+- `DATABASE_URL` (or `POSTGRES_*` if you compose DSN yourself)
+- `REDIS_URL`
+
+---
+
+## Staging
+
+Start:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
 ```
-# ilk kurulum
-docker compose -f docker-compose.prod.yml up -d
 
-# loglar
-docker compose -f docker-compose.prod.yml logs -f bot
-docker compose -f docker-compose.prod.yml logs -f worker
-
-# güncelleme
-cd /opt/landofairdrop-bot/landofairdrop-bot
-git pull
-docker compose -f ../docker-compose.prod.yml up -d --build
+Logs:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml logs -f bot
 ```
 
-## 5) Prod Kontrol Listesi (Kısa)
-- `.env` sadece sunucuda ve erişim limitli
-- `BOT_TOKEN` repoya girmedi
-- `TG_JOIN_CHANNEL` / `TG_JOIN_CHANNEL_ID` doğru
-- `ADMIN_USER_IDS` minimum kişi
-- `alembic upgrade head` sorunsuz
-- `bot` + `worker` aynı anda çalışıyor
+Stop:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.staging.yml down
+```
 
-## 6) Sorun Giderme (Hızlı)
-- Bot sessiz → `docker logs bot`
-- Broadcast gitmiyor → `docker logs worker`
-- DB hatası → `docker logs postgres`
-- Redis → `docker logs redis`
+---
 
-## 7) Notlar
-- Prod’da `debug` kapalı (`ENV=prod`)
-- Compose ile bot/worker aynı image üzerinden koşar
-- Gerektiğinde tek servis restart edebilirsin:
-  ```
-  docker compose -f docker-compose.prod.yml restart bot
-  docker compose -f docker-compose.prod.yml restart worker
-  ```
+## Production
+
+Production should use a separate token, separate DB, and ideally a separate
+server.
+
+If you use the provided `docker-compose.prod.yml`:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+---
+
+## Operational Notes
+
+### Secrets
+- Never commit `.env*` (except `.env.example`)
+- Never commit Telegram bot tokens
+- Use GitHub Actions Secrets for CI
+
+### Backups
+- Postgres volume should be backed up daily
+- Keep at least 7 days retention
+
+### Security
+- Restrict inbound ports (only 80/443 for webhook if used)
+- Use a reverse proxy (Caddy/Nginx) for HTTPS webhooks
+- Keep branch protection + tag checklist workflow enabled
+
+---
+
+## Release Flow
+1. Update `CHANGELOG.md`
+2. Create/Push tag: `vX.Y.Z`
+3. CI runs `release-checklist`
+4. Draft GitHub Release with:
+```bash
+python scripts/release_notes.py vX.Y.Z
+```
+
+---
+
+## Optional: Convenience Commands
+Consider a `Makefile` for:
+- `make up-staging`
+- `make logs-staging`
+- `make down-staging`
