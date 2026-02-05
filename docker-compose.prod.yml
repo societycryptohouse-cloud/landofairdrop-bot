@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: landofairdrop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [app]
+
+  redis:
+    image: redis:7
+    container_name: landofairdrop-redis
+    restart: unless-stopped
+    networks: [app]
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: landofairdrop-bot
+    restart: unless-stopped
+    env_file: .env
+    command: python apps/bot/main.py
+    depends_on:
+      - postgres
+      - redis
+    networks: [app]
+    ports:
+      - "8080:8080"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: landofairdrop-worker
+    restart: unless-stopped
+    env_file: .env
+    command: python worker/main.py
+    depends_on:
+      - redis
+      - postgres
+    networks: [app]
+
+volumes:
+  pgdata:
+
+networks:
+  app:
+    driver: bridge

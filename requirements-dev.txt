@@ -1,0 +1,10 @@
+-r requirements.txt
+pytest
+pytest-asyncio
+pytest-mock
+httpx
+aiogram>=3
+
+ruff
+
+pre-commit
